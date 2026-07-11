@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Eats & Free Home Delivery Directory</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --text: #333;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 1rem;
+        }
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        header p {
+            color: #b2bec3;
+            font-size: 1.1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-top: 5px solid var(--primary);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 0.8rem;
+        }
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+        .price-tag {
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+        .info-line {
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+        }
+        .info-line strong {
+            color: #555;
+        }
+        .btn-call {
+            display: block;
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 0.7rem;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 1.2rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-call:hover {
+            background-color: #1e272e;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 4rem;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Pocket-Friendly Delivery Directory</h1>
+        <p>Affordable Local Hotels & Catering Services with 100% Free Home Delivery</p>
+    </header>
+
+    <div class="container">
+        <div class="grid">
+            
+            <!-- Card 1 -->
+            <div class="card">
+                <div class="card-body">
+                    <span class="badge">FREE DELIVERY</span>
+                    <h2>Thanjavur Mess</h2>
+                    <p class="price-tag">Estimated Price Range: ₹30 - ₹120 per item</p>
+                    <div class="info-line"><strong>Cuisine:</strong> Budget-friendly South Indian Vegetarian</div>
+                    <div class="info-line"><strong>Address:</strong> 36/15, Subba Reddy St, West Mambalam, Chennai - 600033</div>
+                    <div class="info-line"><strong>Phone:</strong> +91 44 2485 1395</div>
+                    <a href="tel:+914424851395" class="btn-call">📞 Call to Order Now</a>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card">
+                <div class="card-body">
+                    <span class="badge">FREE DELIVERY</span>
+                    <h2>Mohan's Hot N Chat Restaurant</h2>
+                    <p class="price-tag">Estimated Price Range: ₹40 - ₹150 per item</p>
+                    <div class="info-line"><strong>Cuisine:</strong> Chaat, Pure Veg Tiffin & North Indian Fast Food</div>
+                    <div class="info-line"><strong>Address:</strong> 22/61, Thambiah Rd, AGS Colony, West Mambalam, Chennai - 600033</div>
+                    <div class="info-line"><strong>Phone:</strong> +91 98400 XXXXX</div>
+                    <a href="tel:#" class="btn-call">📞 Call to Order Now</a>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card">
+                <div class="card-body">
+                    <span class="badge">FREE DELIVERY</span>
+                    <h2>Sri Hema Catering Services</h2>
+                    <p class="price-tag">Estimated Price Range: ₹120 - ₹220 per plate (Bulk Orders)</p>
+                    <div class="info-line"><strong>Cuisine:</strong> Home-style Party Catering & Traditional Meals</div>
+                    <div class="info-line"><strong>Address:</strong> Ground floor, PK Towers, No 18/1, Subba Street, West Mambalam, Chennai - 600033</div>
+                    <div class="info-line"><strong>Phone:</strong> +91 73583 16204</div>
+                    <a href="tel:+917358316204" class="btn-call">📞 Contact for Bulk Orders</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Budget Delivery Directory. Designed for smart local dining.</p>
+    </footer>
+
+</body>
+</html>
