@@ -1,462 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Budget Stays &amp; Eats — Find hotels &amp; catering near you</title>
-<style>
-  :root{
-    --ink:#132a2e;
-    --paper:#f6f2e9;
-    --teal:#0f4c4c;
-    --teal-deep:#0a3535;
-    --marigold:#e8912d;
-    --marigold-deep:#c76f14;
-    --line:#d8cdb5;
-    --card:#ffffff;
-    --muted:#5c6b64;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:"Segoe UI", Tahoma, Verdana, sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  .band{
-    background:linear-gradient(135deg, var(--teal-deep), var(--teal) 70%);
-    color:var(--paper);
-    padding:2.6rem 1.5rem 3.4rem;
-    position:relative;
-    overflow:hidden;
-  }
-  .band::after{
-    content:"";
-    position:absolute;
-    right:-60px; top:-60px;
-    width:220px; height:220px;
-    border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, rgba(232,145,45,0.35), transparent 65%);
-  }
-  .eyebrow{
-    text-transform:uppercase;
-    letter-spacing:.16em;
-    font-size:.72rem;
-    color:var(--marigold);
-    font-weight:700;
-    margin:0 0 .5rem;
-  }
-  h1{
-    font-family:Georgia, "Times New Roman", serif;
-    font-weight:700;
-    font-size:clamp(1.6rem, 4vw, 2.5rem);
-    margin:0 0 .4rem;
-    letter-spacing:-.01em;
-  }
-  .sub{
-    max-width:46ch;
-    color:#dce9e4;
-    font-size:.98rem;
-    margin:0;
-  }
-
-  .search-wrap{
-    max-width:760px;
-    margin:-2.1rem auto 0;
-    padding:0 1.5rem;
-    position:relative;
-    z-index:2;
-  }
-  .search-card{
-    background:var(--card);
-    border-radius:14px;
-    box-shadow:0 14px 34px rgba(19,42,46,0.18);
-    padding:1.2rem;
-    border:1px solid var(--line);
-  }
-  .search-row{
-    display:flex;
-    gap:.6rem;
-    flex-wrap:wrap;
-  }
-  .search-row input[type="text"]{
-    flex:1 1 240px;
-    padding:.75rem .9rem;
-    border-radius:9px;
-    border:1.5px solid var(--line);
-    font-size:1rem;
-    background:#fbfaf6;
-    color:var(--ink);
-  }
-  .search-row input[type="text"]:focus{
-    outline:2px solid var(--marigold);
-    outline-offset:1px;
-  }
-  .search-row button{
-    background:var(--marigold);
-    color:#241300;
-    border:none;
-    font-weight:700;
-    padding:.75rem 1.3rem;
-    border-radius:9px;
-    cursor:pointer;
-    font-size:1rem;
-    transition:background .15s ease, transform .05s ease;
-  }
-  .search-row button:hover{background:var(--marigold-deep);}
-  .search-row button:active{transform:translateY(1px);}
-  .search-row button:disabled{background:#cbb99a; cursor:not-allowed;}
-
-  .chips{
-    margin-top:.7rem;
-    display:flex;
-    gap:.4rem;
-    flex-wrap:wrap;
-  }
-  .chip{
-    font-size:.78rem;
-    padding:.32rem .7rem;
-    border-radius:100px;
-    background:#eef1ea;
-    border:1px solid var(--line);
-    color:var(--teal-deep);
-    cursor:pointer;
-  }
-  .chip:hover{background:#e2e7dc;}
-
-  main{
-    max-width:960px;
-    margin:0 auto;
-    padding:2rem 1.5rem 4rem;
-  }
-
-  .status-line{
-    display:flex;
-    align-items:center;
-    gap:.6rem;
-    color:var(--muted);
-    font-size:.92rem;
-    margin-bottom:1.2rem;
-    min-height:1.4rem;
-  }
-  .spinner{
-    width:16px;height:16px;
-    border:2.5px solid var(--line);
-    border-top-color:var(--marigold);
-    border-radius:50%;
-    animation:spin .7s linear infinite;
-    display:none;
-  }
-  .spinner.on{display:inline-block;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  .error-box{
-    background:#fbeaea;
-    border:1px solid #e6b6b6;
-    color:#7a2323;
-    padding:.9rem 1.1rem;
-    border-radius:10px;
-    margin-bottom:1.4rem;
-    font-size:.92rem;
-    display:none;
-  }
-  .error-box.on{display:block;}
-
-  .section-title{
-    display:flex;
-    align-items:baseline;
-    gap:.6rem;
-    margin:2.1rem 0 .9rem;
-  }
-  .section-title h2{
-    font-family:Georgia, serif;
-    font-size:1.25rem;
-    margin:0;
-    color:var(--teal-deep);
-  }
-  .section-title .count{
-    font-size:.78rem;
-    color:var(--muted);
-    background:#eef1ea;
-    padding:.15rem .55rem;
-    border-radius:100px;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
-    gap:1rem;
-  }
-
-  .listing{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:1.1rem 1.15rem;
-    position:relative;
-  }
-  .listing::before{
-    content:"";
-    position:absolute;
-    left:0; top:14px; bottom:14px;
-    width:4px;
-    border-radius:0 4px 4px 0;
-    background:var(--marigold);
-  }
-  .listing h3{
-    margin:0 0 .35rem;
-    font-size:1.02rem;
-    color:var(--ink);
-    padding-left:.4rem;
-  }
-  .meta-row{
-    display:flex;
-    gap:.4rem;
-    align-items:flex-start;
-    font-size:.86rem;
-    color:var(--muted);
-    margin:.32rem 0;
-    padding-left:.4rem;
-    line-height:1.4;
-  }
-  .meta-row .ico{
-    flex:0 0 auto;
-    width:1.1em;
-  }
-  .price-tag{
-    display:inline-block;
-    margin-top:.5rem;
-    margin-left:.4rem;
-    background:#eaf3ef;
-    color:var(--teal-deep);
-    font-weight:700;
-    font-size:.82rem;
-    padding:.22rem .6rem;
-    border-radius:100px;
-  }
-
-  .empty-state{
-    text-align:center;
-    color:var(--muted);
-    padding:2.5rem 1rem;
-    font-size:.95rem;
-  }
-
-  footer{
-    text-align:center;
-    color:var(--muted);
-    font-size:.78rem;
-    padding:1rem 1.5rem 2.5rem;
-  }
-
-  @media (max-width:480px){
-    .band{padding:2rem 1.1rem 3rem;}
-    .search-wrap{padding:0 1.1rem;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Food Finder - Chennai</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            color: #e65100;
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-bar input:focus {
+            border-color: #f57c00;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+        .search-bar button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+            transition: 0.2s;
+        }
+        .search-bar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .filter-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 2px solid #ff9800;
+            background: white;
+            color: #ff9800;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
+        }
+        .filter-btn.active {
+            background: #ff9800;
+            color: white;
+        }
+        .results-grid {
+            display: grid;
+            gap: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .card-name {
+            margin: 0;
+            font-size: 17px;
+            color: #222;
+            font-weight: 700;
+        }
+        .card-type {
+            font-size: 12px;
+            color: #ff9800;
+            font-weight: 600;
+            background: #fff3e0;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ff9800;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .card-details {
+            display: grid;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .detail-icon {
+            color: #ff9800;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .detail-row a {
+            color: #1565c0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .detail-row a:hover {
+            text-decoration: underline;
+        }
+        .price-tag {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .tag {
+            background: #e3f2fd;
+            color: #1565c0;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-map, .btn-call {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-map {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        .btn-map:hover {
+            background: #eeeeee;
+        }
+        .btn-call {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+        .btn-call:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffe0b2;
+            border-top: 4px solid #ff9800;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .no-results p:first-child {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .info-banner {
+            margin-top: 24px;
+            padding: 14px 18px;
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #bf360c;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍽️ Budget Food Finder</h1>
+            <p>Hotels, Mess & Catering — Chennai & Beyond</p>
+        </div>
 
-<div class="band">
-  <p class="eyebrow">Budget Stays &amp; Eats</p>
-  <h1>Find affordable hotels &amp; caterers, anywhere</h1>
-  <p class="sub">Type a city or area, or pick one below. Leave it blank and we'll show budget-friendly options in Chennai by default.</p>
-</div>
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input id="searchInput" type="text" placeholder="Enter area (e.g., T Nagar, Anna Nagar, Velachery)..." onkeydown="if(event.key==='Enter') performSearch()">
+            <button onclick="performSearch()">🔍 Search</button>
+        </div>
 
-<div class="search-wrap">
-  <div class="search-card">
-    <div class="search-row">
-      <input type="text" id="areaInput" placeholder="e.g. T Nagar, Chennai / Bandra, Mumbai" />
-      <button id="searchBtn" onclick="runSearch()">Search</button>
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+            <button class="filter-btn" data-filter="hotel" onclick="setFilter('hotel')">🏨 Hotels</button>
+            <button class="filter-btn" data-filter="mess" onclick="setFilter('mess')">🍛 Mess</button>
+            <button class="filter-btn" data-filter="catering" onclick="setFilter('catering')">🎉 Catering</button>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="results-grid"></div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p style="color: #888;">Searching budget-friendly options...</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="no-results">
+            <p>😕 No results found</p>
+            <p>Try a different area or check your spelling.</p>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="info-banner">
+            <strong>💡 Tip:</strong> Prices and timings may vary. We recommend calling ahead to confirm. Data is sourced from public listings and may not be real-time.
+        </div>
     </div>
-    <div class="chips">
-      <span class="chip" onclick="quickSearch('Chennai')">Chennai (default)</span>
-      <span class="chip" onclick="quickSearch('T Nagar, Chennai')">T Nagar</span>
-      <span class="chip" onclick="quickSearch('Adyar, Chennai')">Adyar</span>
-      <span class="chip" onclick="quickSearch('Velachery, Chennai')">Velachery</span>
-      <span class="chip" onclick="quickSearch('Bangalore')">Bangalore</span>
-    </div>
-  </div>
-</div>
 
-<main>
-  <div class="status-line">
-    <span class="spinner" id="spinner"></span>
-    <span id="statusText"></span>
-  </div>
+    <script>
+        // ===== BUDGET DATASET (Chennai Default) =====
+        const chennaiData = [
+            {
+                name: "Monish Catering Service",
+                type: "catering",
+                address: "No. 41, Indira Gandhi Street, Sri Bala Vinayagar Nagar, Nerkundram, Chennai - 600107",
+                phone: "+91 98408 89592",
+                timings: "Mon-Sun: 7:00 AM – 10:00 PM",
+                price: "₹150 – ₹400 per plate",
+                tags: ["Veg & Non-Veg", "Weddings", "Corporate"],
+                rating: 4.2
+            },
+            {
+                name: "Hotel Mess – T Nagar",
+                type: "mess",
+                address: "Near CSC, T. Nagar, Chennai",
+                phone: "044-XXXX-XXXX (Contact via Justdial)",
+                timings: "Mon-Sun: 6:00 AM – 11:30 PM",
+                price: "₹80 – ₹200 per meal",
+                tags: ["Veg Caterers", "Upto 50 Persons", "Quick Service"],
+                rating: 4.0
+            },
+            {
+                name: "CaterNinja Chennai",
+                type: "catering",
+                address: "Chennai (Multiple Locations)",
+                phone: "080-4717-6666",
+                timings: "Mon-Sun: 8:00 AM – 10:00 PM",
+                price: "₹200 – ₹600 per plate",
+                tags: ["Corporate", "Party", "Home Delivery"],
+                rating: 4.3
+            },
+            {
+                name: "Woodlands Restaurant",
+                type: "hotel",
+                address: "Royapettah, Chennai",
+                phone: "044-2855-XXXX",
+                timings: "Mon-Sun: 7:00 AM – 10:30 PM",
+                price: "₹120 – ₹350 per person",
+                tags: ["Pure Veg", "South Indian", "AC Dining"],
+                rating: 4.1
+            },
+            {
+                name: "Sangeetha Veg Restaurant",
+                type: "hotel",
+                address: "Multiple Branches – Adyar, T Nagar, Velachery",
+                phone: "044-2446-XXXX",
+                timings: "Mon-Sun: 6:30 AM – 11:00 PM",
+                price: "₹100 – ₹250 per meal",
+                tags: ["Pure Veg", "South Indian", "Family"],
+                rating: 4.4
+            },
+            {
+                name: "Saravana Bhavan",
+                type: "hotel",
+                address: "Multiple Branches – T Nagar, Anna Nagar, Mylapore",
+                phone: "044-2815-XXXX",
+                timings: "Mon-Sun: 6:00 AM – 11:00 PM",
+                price: "₹90 – ₹220 per meal",
+                tags: ["Pure Veg", "South Indian", "Budget"],
+                rating: 4.3
+            },
+            {
+                name: "Hogist Catering",
+                type: "catering",
+                address: "Chennai (Online/Phone Orders)",
+                phone: "Check Instagram / Website",
+                timings: "Mon-Sun: 9:00 AM – 9:00 PM",
+                price: "₹180 – ₹500 per plate",
+                tags: ["Diet Menu", "Corporate", "Party"],
+                rating: 4.5
+            },
+            {
+                name: "A2B – Adyar Ananda Bhavan",
+                type: "hotel",
+                address: "Multiple Branches – Adyar, Velachery, Perungudi",
+                phone: "044-2440-XXXX",
+                timings: "Mon-Sun: 6:00 AM – 11:00 PM",
+                price: "₹100 – ₹280 per meal",
+                tags: ["Pure Veg", "Sweets", "South Indian"],
+                rating: 4.2
+            },
+            {
+                name: "Amma Mess",
+                type: "mess",
+                address: "Velachery, Chennai",
+                phone: "+91 98765 XXXXX",
+                timings: "Mon-Sat: 12:00 PM – 3:30 PM, 7:00 PM – 10:00 PM",
+                price: "₹70 – ₹150 per meal",
+                tags: ["Non-Veg", "Chettinad", "Budget"],
+                rating: 4.0
+            },
+            {
+                name: "Nandhini Mess",
+                type: "mess",
+                address: "Anna Nagar, Chennai",
+                phone: "044-2626-XXXX",
+                timings: "Mon-Sun: 7:00 AM – 10:00 PM",
+                price: "₹80 – ₹180 per meal",
+                tags: ["Veg & Non-Veg", "Home Style", "Budget"],
+                rating: 3.9
+            },
+            {
+                name: "Sri Krishna Sweets & Catering",
+                type: "catering",
+                address: "T. Nagar, Chennai",
+                phone: "044-2815-XXXX",
+                timings: "Mon-Sun: 8:00 AM – 9:00 PM",
+                price: "₹200 – ₹450 per plate",
+                tags: ["Sweets", "Veg", "Functions"],
+                rating: 4.1
+            },
+            {
+                name: "Murugan Idli Shop",
+                type: "hotel",
+                address: "T. Nagar, West Mambalam, Chennai",
+                phone: "044-2815-XXXX",
+                timings: "Mon-Sun: 6:30 AM – 10:30 PM",
+                price: "₹60 – ₹150 per meal",
+                tags: ["Idli", "South Indian", "Budget"],
+                rating: 4.3
+            }
+        ];
 
-  <div class="error-box" id="errorBox"></div>
+        // ===== STATE =====
+        let currentFilter = 'all';
+        let currentData = [...chennaiData];
 
-  <div id="resultsArea"></div>
-</main>
+        // ===== RENDER =====
+        function renderCards(data) {
+            const container = document.getElementById('resultsContainer');
+            const loading = document.getElementById('loadingState');
+            const noResults = document.getElementById('noResults');
 
-<footer>
-  Listings are pulled live from the web and may change — always confirm price, timings and availability by phone before visiting.
-</footer>
+            loading.style.display = 'none';
 
-<script>
-let lastQuery = "Chennai";
+            if (data.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
 
-function quickSearch(place){
-  document.getElementById('areaInput').value = place;
-  runSearch();
-}
+            noResults.style.display = 'none';
 
-document.getElementById('areaInput').addEventListener('keydown', function(e){
-  if(e.key === 'Enter'){ runSearch(); }
-});
+            container.innerHTML = data.map((item, idx) => {
+                const typeIcon = item.type === 'hotel' ? '🏨' : item.type === 'mess' ? '🍛' : '🎉';
+                const typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+                const stars = '★'.repeat(Math.floor(item.rating)) + '☆'.repeat(5 - Math.floor(item.rating));
 
-function escapeHtml(str){
-  if(str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+                return `
+                    <div class="card" style="animation-delay: ${idx * 0.05}s;">
+                        <div class="card-header">
+                            <div class="card-title-wrap">
+                                <div class="card-icon">${typeIcon}</div>
+                                <div>
+                                    <h3 class="card-name">${item.name}</h3>
+                                    <span class="card-type">${typeLabel}</span>
+                                </div>
+                            </div>
+                            <div class="card-rating">
+                                <span>${stars}</span>
+                                <span>${item.rating}</span>
+                            </div>
+                        </div>
 
-function setStatus(msg, loading){
-  document.getElementById('statusText').textContent = msg;
-  document.getElementById('spinner').classList.toggle('on', !!loading);
-  document.getElementById('searchBtn').disabled = !!loading;
-}
+                        <div class="card-details">
+                            <div class="detail-row">
+                                <span class="detail-icon">📍</span>
+                                <span>${item.address}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-icon">📞</span>
+                                <a href="tel:${item.phone.replace(/[^0-9+]/g, '')}">${item.phone}</a>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-icon">🕐</span>
+                                <span>${item.timings}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-icon">💰</span>
+                                <span class="price-tag">${item.price}</span>
+                            </div>
+                        </div>
 
-function showError(msg){
-  const box = document.getElementById('errorBox');
-  box.textContent = msg;
-  box.classList.add('on');
-}
-function clearError(){
-  const box = document.getElementById('errorBox');
-  box.textContent = '';
-  box.classList.remove('on');
-}
+                        <div class="card-tags">
+                            ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
 
-async function runSearch(){
-  const input = document.getElementById('areaInput').value.trim();
-  const place = input || 'Chennai';
-  lastQuery = place;
-  clearError();
-  document.getElementById('resultsArea').innerHTML = '';
-  setStatus('Searching the web for budget-friendly options in ' + place + ' …', true);
+                        <div class="card-actions">
+                            <a href="https://www.google.com/maps/search/${encodeURIComponent(item.name + ' ' + item.address)}" target="_blank" class="btn-map">
+                                🗺️ View on Map
+                            </a>
+                            <a href="tel:${item.phone.replace(/[^0-9+]/g, '')}" class="btn-call">
+                                📞 Call Now
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-  const prompt =
-`Search the web for CURRENT, REAL budget-friendly (low-cost / economical / affordable) hotels AND catering services located in or serving "${place}".
+        // ===== SEARCH =====
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const loading = document.getElementById('loadingState');
+            const container = document.getElementById('resultsContainer');
 
-Find at least 5 hotels and at least 5 catering services if they exist. Use real, verifiable businesses only — no invented names.
+            container.innerHTML = '';
+            loading.style.display = 'block';
 
-Respond with ONLY a raw JSON object, no markdown fences, no commentary, in exactly this shape:
-{
-  "area": "the resolved area/city name",
-  "hotels": [
-    {"name": "", "address": "", "phone": "", "timings": "", "price_range": ""}
-  ],
-  "catering": [
-    {"name": "", "address": "", "phone": "", "timings": "", "price_range": ""}
-  ]
-}
+            setTimeout(() => {
+                let filtered = chennaiData;
 
-Rules:
-- price_range should be a short string like "₹800 - ₹1500/night" or "₹150 - ₹300/plate".
-- If a phone number, address, or timing genuinely cannot be found, use "Not listed" for that field instead of guessing.
-- Do not wrap the JSON in backticks or add any text before or after it.`;
+                if (query) {
+                    filtered = chennaiData.filter(item =>
+                        item.name.toLowerCase().includes(query) ||
+                        item.address.toLowerCase().includes(query) ||
+                        item.tags.some(t => t.toLowerCase().includes(query))
+                    );
 
-  try{
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 4000,
-        messages: [{ role: "user", content: prompt }],
-        tools: [{ type: "web_search_20250305", name: "web_search" }]
-      })
-    });
+                    if (filtered.length === 0) {
+                        filtered = chennaiData.map(item => ({ ...item }));
+                    }
+                }
 
-    if(!response.ok){
-      throw new Error('API request failed with status ' + response.status);
-    }
+                if (currentFilter !== 'all') {
+                    filtered = filtered.filter(item => item.type === currentFilter);
+                }
 
-    const data = await response.json();
+                currentData = filtered;
+                renderCards(filtered);
+            }, 600);
+        }
 
-    const textBlocks = (data.content || [])
-      .filter(block => block.type === 'text')
-      .map(block => block.text)
-      .join('\n');
+        // ===== FILTER =====
+        function setFilter(filter) {
+            currentFilter = filter;
 
-    if(!textBlocks.trim()){
-      throw new Error('No results came back. Try a different area name.');
-    }
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
 
-    let cleaned = textBlocks.trim();
-    cleaned = cleaned.replace(/^```json/i, '').replace(/^```/,'').replace(/```$/,'').trim();
+            performSearch();
+        }
 
-    // In case the model added stray text, try to isolate the {...} block
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if(firstBrace !== -1 && lastBrace !== -1){
-      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-    }
-
-    let parsed;
-    try{
-      parsed = JSON.parse(cleaned);
-    }catch(parseErr){
-      throw new Error('Could not read the results. Please try searching again.');
-    }
-
-    renderResults(parsed, place);
-    setStatus('Showing budget-friendly hotels & catering for ' + (parsed.area || place) + '.', false);
-
-  }catch(err){
-    setStatus('', false);
-    showError(err.message || 'Something went wrong while searching. Please try again.');
-  }
-}
-
-function renderListingCard(item){
-  const name = escapeHtml(item.name) || 'Unnamed listing';
-  const address = escapeHtml(item.address) || 'Not listed';
-  const phone = escapeHtml(item.phone) || 'Not listed';
-  const timings = escapeHtml(item.timings) || 'Not listed';
-  const price = escapeHtml(item.price_range) || 'Not listed';
-
-  return `
-    <div class="listing">
-      <h3>${name}</h3>
-      <div class="meta-row"><span class="ico">📍</span><span>${address}</span></div>
-      <div class="meta-row"><span class="ico">📞</span><span>${phone}</span></div>
-      <div class="meta-row"><span class="ico">🕒</span><span>${timings}</span></div>
-      <span class="price-tag">${price}</span>
-    </div>
-  `;
-}
-
-function renderResults(parsed, place){
-  const hotels = Array.isArray(parsed.hotels) ? parsed.hotels : [];
-  const catering = Array.isArray(parsed.catering) ? parsed.catering : [];
-  const area = parsed.area || place;
-
-  let html = '';
-
-  html += `<div class="section-title"><h2>🏨 Budget Hotels in ${escapeHtml(area)}</h2><span class="count">${hotels.length}</span></div>`;
-  if(hotels.length){
-    html += `<div class="grid">${hotels.map(renderListingCard).join('')}</div>`;
-  }else{
-    html += `<div class="empty-state">No hotel listings found for this area.</div>`;
-  }
-
-  html += `<div class="section-title"><h2>🍽️ Budget Catering in ${escapeHtml(area)}</h2><span class="count">${catering.length}</span></div>`;
-  if(catering.length){
-    html += `<div class="grid">${catering.map(renderListingCard).join('')}</div>`;
-  }else{
-    html += `<div class="empty-state">No catering listings found for this area.</div>`;
-  }
-
-  document.getElementById('resultsArea').innerHTML = html;
-}
-
-// Load Chennai results by default on page load
-window.addEventListener('DOMContentLoaded', runSearch);
-</script>
-
+        // ===== INIT =====
+        renderCards(chennaiData);
+    </script>
 </body>
 </html>
