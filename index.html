@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Eats & Free Home Delivery Directory</title>
+    <title>Chennai Live-Sync Budget Food Directory</title>
     <style>
         :root {
             --primary: #2ecc71;
             --dark: #2c3e50;
             --light: #f8f9fa;
             --text: #333;
+            --danger: #e74c3c;
         }
         * {
             box-sizing: border-box;
@@ -26,19 +27,43 @@
             background-color: var(--dark);
             color: white;
             text-align: center;
-            padding: 2.5rem 1rem;
+            padding: 3rem 1rem;
+            position: relative;
         }
         header h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin-bottom: 0.5rem;
         }
-        header p {
-            color: #b2bec3;
-            font-size: 1.1rem;
+        .live-status {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
         }
+        .search-container {
+            max-width: 800px;
+            margin: -1.5rem auto 2rem auto;
+            padding: 0 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+        .search-box, .filter-box {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 1rem;
+        }
+        .search-box { flex: 2; }
+        .filter-box { flex: 1; background: white; cursor: pointer; }
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
+            margin: 0 auto 4rem auto;
             padding: 0 1rem;
         }
         .grid {
@@ -51,17 +76,15 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             overflow: hidden;
-            border-top: 5px solid var(--primary);
-            transition: transform 0.2s;
+            border-top: 5px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card-body {
-            padding: 1.5rem;
-        }
+        .card.active-offer { border-top-color: var(--primary); }
+        .card.expired-offer { border-top-color: var(--danger); opacity: 0.75; }
+        .card-body { padding: 1.5rem; }
         .badge {
-            background-color: var(--primary);
             color: white;
             padding: 0.2rem 0.6rem;
             border-radius: 50px;
@@ -70,24 +93,23 @@
             display: inline-block;
             margin-bottom: 0.8rem;
         }
-        .card h2 {
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            font-size: 1.4rem;
-        }
-        .price-tag {
+        .badge.bg-success { background-color: var(--primary); }
+        .badge.bg-danger { background-color: var(--danger); }
+        .zone-badge {
+            background-color: #3498db;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
             font-weight: bold;
-            color: #e67e22;
-            margin-bottom: 1rem;
-            font-size: 1.05rem;
+            display: inline-block;
+            margin-bottom: 0.8rem;
+            margin-left: 0.5rem;
         }
-        .info-line {
-            margin-bottom: 0.6rem;
-            font-size: 0.95rem;
-        }
-        .info-line strong {
-            color: #555;
-        }
+        .card h2 { color: var(--dark); margin-bottom: 0.5rem; font-size: 1.4rem; }
+        .price-tag { font-weight: bold; color: #e67e22; margin-bottom: 1rem; font-size: 1.05rem; }
+        .info-line { margin-bottom: 0.6rem; font-size: 0.95rem; }
+        .info-line strong { color: #555; }
         .btn-call {
             display: block;
             background-color: var(--dark);
@@ -98,76 +120,132 @@
             border-radius: 5px;
             margin-top: 1.2rem;
             font-weight: bold;
-            transition: background 0.2s;
         }
-        .btn-call:hover {
-            background-color: #1e272e;
-        }
-        footer {
-            text-align: center;
-            padding: 2rem;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-top: 4rem;
-            border-top: 1px solid #ddd;
-        }
+        .no-results { text-align: center; font-size: 1.2rem; color: #7f8c8d; grid-column: 1 / -1; padding: 3rem; }
+        footer { text-align: center; padding: 2rem; color: #7f8c8d; border-top: 1px solid #ddd; background: white; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Pocket-Friendly Delivery Directory</h1>
-        <p>Affordable Local Hotels & Catering Services with 100% Free Home Delivery</p>
+        <h1>Live Chennai Budget Delivery Dashboard</h1>
+        <p>Connected to Active Google Sheet Registry</p>
+        <div class="live-status" id="syncStatus">🟢 Checking status live...</div>
     </header>
 
+    <div class="search-container">
+        <input type="text" id="searchBar" class="search-box" placeholder="Search by area or cuisine (e.g. Vadapalani, Biryani)...">
+        <select id="zoneFilter" class="filter-box">
+            <option value="All">All Chennai Zones</option>
+            <option value="Central">Central</option>
+            <option value="North">North</option>
+            <option value="South">South</option>
+            <option value="West">West</option>
+        </select>
+    </div>
+
     <div class="container">
-        <div class="grid">
-            
-            <!-- Card 1 -->
-            <div class="card">
-                <div class="card-body">
-                    <span class="badge">FREE DELIVERY</span>
-                    <h2>Thanjavur Mess</h2>
-                    <p class="price-tag">Estimated Price Range: ₹30 - ₹120 per item</p>
-                    <div class="info-line"><strong>Cuisine:</strong> Budget-friendly South Indian Vegetarian</div>
-                    <div class="info-line"><strong>Address:</strong> 36/15, Subba Reddy St, West Mambalam, Chennai - 600033</div>
-                    <div class="info-line"><strong>Phone:</strong> +91 44 2485 1395</div>
-                    <a href="tel:+914424851395" class="btn-call">📞 Call to Order Now</a>
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="card">
-                <div class="card-body">
-                    <span class="badge">FREE DELIVERY</span>
-                    <h2>Mohan's Hot N Chat Restaurant</h2>
-                    <p class="price-tag">Estimated Price Range: ₹40 - ₹150 per item</p>
-                    <div class="info-line"><strong>Cuisine:</strong> Chaat, Pure Veg Tiffin & North Indian Fast Food</div>
-                    <div class="info-line"><strong>Address:</strong> 22/61, Thambiah Rd, AGS Colony, West Mambalam, Chennai - 600033</div>
-                    <div class="info-line"><strong>Phone:</strong> +91 98400 XXXXX</div>
-                    <a href="tel:#" class="btn-call">📞 Call to Order Now</a>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="card">
-                <div class="card-body">
-                    <span class="badge">FREE DELIVERY</span>
-                    <h2>Sri Hema Catering Services</h2>
-                    <p class="price-tag">Estimated Price Range: ₹120 - ₹220 per plate (Bulk Orders)</p>
-                    <div class="info-line"><strong>Cuisine:</strong> Home-style Party Catering & Traditional Meals</div>
-                    <div class="info-line"><strong>Address:</strong> Ground floor, PK Towers, No 18/1, Subba Street, West Mambalam, Chennai - 600033</div>
-                    <div class="info-line"><strong>Phone:</strong> +91 73583 16204</div>
-                    <a href="tel:+917358316204" class="btn-call">📞 Contact for Bulk Orders</a>
-                </div>
-            </div>
-
+        <div class="grid" id="directoryGrid">
+            <div class="no-results">Connecting to cloud system database entries...</div>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 Budget Delivery Directory. Designed for smart local dining.</p>
+        <p>&copy; 2026 Chennai Budget System. Auto-updating loop active.</p>
     </footer>
 
-</body>
-</html>
+    <script>
+        // PASTE YOUR PUBLISHED GOOGLE SHEET COMMA-SEPARATED VALUES (CSV) LINK HERE:
+        const sheetUrl = "https://google.com";
+
+        let localVendorsDb = [];
+
+        // Helper to safely clean text lines from CSV format
+        function parseCSV(text) {
+            let lines = text.split("\n");
+            let result = [];
+            let headers = lines[0].split(",").map(h => h.trim());
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i]) continue;
+                let obj = {};
+                let currentline = lines[i].split(",");
+                
+                headers.forEach((header, index) => {
+                    obj[header] = currentline[index] ? currentline[index].trim() : "";
+                });
+                result.push(obj);
+            }
+            return result;
+        }
+
+        // Main core function to pull live sheet rows and evaluate offer rules
+        async function fetchLiveSheetDatabase() {
+            try {
+                document.getElementById('syncStatus').innerText = "🔄 Live Scan: Scanning Database...";
+                const response = await fetch(sheetUrl);
+                const dataText = await response.text();
+                
+                localVendorsDb = parseCSV(dataText);
+                filterAndRenderUI();
+                
+                const timeStr = new Date().toLocaleTimeString();
+                document.getElementById('syncStatus').innerText = `🟢 Cloud Sync Active (Checked at ${timeStr})`;
+            } catch (error) {
+                console.error("Database connection failure:", error);
+                document.getElementById('syncStatus').innerText = "⚠️ Error Syncing Sheet Database";
+            }
+        }
+
+        function filterAndRenderUI() {
+            const grid = document.getElementById('directoryGrid');
+            const searchText = document.getElementById('searchBar').value.toLowerCase();
+            const selectedZone = document.getElementById('zoneFilter').value;
+
+            grid.innerHTML = "";
+
+            const filtered = localVendorsDb.filter(vendor => {
+                if(!vendor.Name) return false;
+                const matchesSearch = (vendor.Area || "").toLowerCase().includes(searchText) || 
+                                      (vendor.Name || "").toLowerCase().includes(searchText) ||
+                                      (vendor.Cuisine || "").toLowerCase().includes(searchText);
+                const matchesZone = selectedZone === "All" || vendor.Zone === selectedZone;
+                return matchesSearch && matchesZone;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="no-results">No restaurants match your search or filter requirements.</div>`;
+                return;
+            }
+
+            filtered.forEach(vendor => {
+                const isOfferActive = (vendor.OfferStatus || "").toLowerCase() === 'active';
+                const cardClass = isOfferActive ? 'card active-offer' : 'card expired-offer';
+                const badgeHtml = isOfferActive ? 
+                    `<span class="badge bg-success">● FREE DELIVERY RUNNING</span>` : 
+                    `<span class="badge bg-danger">⚠️ DELIVERY EXPIRED</span>`;
+
+                const card = document.createElement('div');
+                card.className = cardClass;
+                card.innerHTML = `
+                    <div class="card-body">
+                        ${badgeHtml}
+                        <span class="zone-badge">${vendor.Zone || 'Chennai'}</span>
+                        <h2>${vendor.Name}</h2>
+                        <p class="price-tag">Avg Cost: ${vendor.Price || 'Budget'}</p>
+                        <div class="info-line"><strong>Cuisine:</strong> ${vendor.Cuisine || 'N/A'}</div>
+                        <div class="info-line"><strong>Hub:</strong> ${vendor.Area || 'N/A'}</div>
+                        <div class="info-line"><strong>Address:</strong> ${vendor.Address || 'N/A'}</div>
+                        <div class="info-line"><strong>Phone:</strong> ${vendor.Phone || 'N/A'}</div>
+                        <a href="tel:${(vendor.Phone || '').replace(/\s+/g, '')}" class="btn-call">📞 Call Now</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Live checking interval loops
+        document.getElementById('searchBar').addEventListener('input', filterAndRenderUI);
+        document.getElementById('zoneFilter').addEventListener('change', filterAndRenderUI);
+
+        // Fetch immediately on startup
